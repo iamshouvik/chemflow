@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/invoices")
@@ -20,7 +21,11 @@ public class InvoiceController {
     private final PdfGeneratorService pdfGeneratorService;
 
     // Endpoint: Generate and save an invoice
-    // URL: POST http://localhost:8080/api/invoices
+    @GetMapping
+    public List<Invoice> getAllInvoices() {
+        return invoiceService.getAllInvoices();
+    }
+
     @PostMapping
     public Invoice createInvoice(@RequestBody Invoice invoice) {
         return invoiceService.generateInvoice(invoice);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,10 @@ public class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
+
+    public List<Invoice> getAllInvoices() {
+        return invoiceRepository.findAll();
+    }
 
     public Invoice generateInvoice(Invoice invoice){
     

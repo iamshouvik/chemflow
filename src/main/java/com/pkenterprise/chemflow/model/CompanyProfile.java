@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "company_profiles")
-public class CompanyProfile {
+public class CompanyProfile extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
