@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        /* Exact A4 scaling with tiny margins so the big table has room to breathe */
+        @page { size: A4; margin: 5mm; }
+        body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; padding: 0; }
+        
+        /* The Master Wrapper */
+        .master-table { width: 100%; border-collapse: collapse; border: 2px solid #000; }
+        .master-table td { border-bottom: 1px solid #000; padding: 5px; vertical-align: top; }
+        
+        /* Inner split for Company / Invoice Details */
+        .header-left { width: 50%; float: left; border-right: 1px solid #000; padding-right: 5px; box-sizing: border-box; }
+        .header-right { width: 50%; float: left; padding-left: 5px; box-sizing: border-box;}
+        .company-title { font-size: 18px; font-weight: bold; color: #000080; }
+        
+        /* Consignee / Buyer split */
+        .address-split { width: 100%; display: table; }
+        .consignee { display: table-cell; width: 50%; border-right: 1px solid #000; padding-right: 5px; }
+        .buyer { display: table-cell; width: 50%; padding-left: 5px; }
+        
+        /* The Massive Items Grid */
+        .items-table { width: 100%; border-collapse: collapse; height: 500px; }
+        .items-table th { border: 1px solid #000; border-top: none; padding: 5px; text-align: center; font-weight: bold; }
+        .items-table td { border-left: 1px solid #000; border-right: 1px solid #000; padding: 5px; vertical-align: top; }
+        
+        /* Footer Split */
+        .footer-split { width: 100%; display: table; }
+        .declaration { display: table-cell; width: 50%; border-right: 1px solid #000; padding-right: 5px; }
+        .bank { display: table-cell; width: 50%; padding-left: 5px; }
+    </style>
+</head>
+<body>
+    <!-- Title -->
+    <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">TAX INVOICE</div>
+    
+    <!-- MASTER WRAPPER TABLE -->
+    <table class="master-table">
+        
+        <!-- ROW 1: Header Info -->
+        <tr>
+            <td style="padding: 0;">
+                <div class="header-left">
+                    <div class="company-title" th:text="${company.companyName}"></div>
+                    <div th:text="${company.subtitle}"></div>
+                    <div><span th:text="${company.address}"></span></div>
+                    <div>Mobile: <span th:text="${company.phone}"></span></div>
+                    <div><b>GSTIN: <span th:text="${company.gstin}"></span></b></div>
+                    <div>State Name: West Bengal, Code: 19</div>
+                </div>
+                <div class="header-right">
+                    <div><b>Invoice No.</b></div>
+                    <div style="font-weight: bold; font-size: 14px;" th:text="${invoice.invoiceNumber}"></div>
+                    <br/>
+                    <div><b>Dated</b></div>
+                    <div style="font-weight: bold;" th:text="${invoice.invoiceDate}"></div>
+                </div>
+                <div style="clear: both;"></div>
+            </td>
+        </tr>
+        
+        <!-- ROW 2: Consignee and Buyer -->
+        <tr>
+            <td style="padding: 0;">
+                <div class="address-split">
+                    <div class="consignee">
+                        Consignee (Ship to)<br/>
+                        <b style="font-size: 12px;" th:text="${invoice.customer.name}"></b><br/>
+                        <span th:text="${invoice.customer.address}"></span><br/>
+                        GSTIN/UIN: <span th:text="${invoice.customer.gstin}"></span><br/>
+                        State Name: <span th:text="${invoice.customer.state}"></span>, Code: <span th:text="${invoice.customer.stateCode}"></span>
+                    </div>
+                    <div class="buyer">
+                        Buyer (Bill to)<br/>
+                        <b style="font-size: 12px;" th:text="${invoice.customer.name}"></b><br/>
+                        <span th:text="${invoice.customer.address}"></span><br/>
+                        GSTIN/UIN: <span th:text="${invoice.customer.gstin}"></span><br/>
+                        State Name: <span th:text="${invoice.customer.state}"></span>, Code: <span th:text="${invoice.customer.stateCode}"></span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        
+        <!-- ROW 3: The Items Grid (Includes Embedded Taxes!) -->
+        <tr>
+            <td style="padding: 0;">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="border-left: none; width: 5%;">Sl No.</th>
+                            <th style="width: 40%;">Description of Goods</th>
+                            <th style="width: 15%;">HSN/SAC</th>
+                            <th style="width: 10%;">Quantity</th>
+                            <th style="width: 10%;">Rate</th>
+                            <th style="border-right: none; width: 20%;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Actual Items -->
+                        <tr th:each="item, stat : ${invoice.items}">
+                            <td style="border-left: none; text-align: center;" th:text="${stat.count}"></td>
+                            <td style="font-weight: bold;" th:text="${item.particulars}"></td>
+                            <td style="text-align: center;" th:text="${item.hsnCode}"></td>
+                            <td style="text-align: center;" th:text="${item.quantity}"></td>
+                            <td style="text-align: right;" th:text="${item.rate}"></td>
+                            <td style="border-right: none; text-align: right; font-weight: bold;" th:text="${item.amount}"></td>
+                        </tr>
+                        
+                        <!-- Embedded Taxes (Mimics the Screenshot exactly!) -->
+                        <tr>
+                            <td style="border-left: none; text-align: right; padding-right: 5px;">
+                                <br/><br/><br/>
+                                <i th:if="${invoice.roundedOff < 0}">Less :</i>
+                            </td>
+                            <td style="text-align: right; padding-right: 30px;">
+                                <i><b>CGST</b></i><br/>
+                                <i><b>SGST</b></i><br/>
+                                <i><b>IGST</b></i><br/>
+                                <i><b>ROUNDED OFF</b></i>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="border-right: none; text-align: right; font-weight: bold;">
+                                <div th:text="${invoice.cgstAmount}"></div>
+                                <div th:text="${invoice.sgstAmount}"></div>
+                                <div th:text="${invoice.igstAmount}"></div>
+                                <div th:text="${invoice.roundedOff}"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- ROW 4: Final Total -->
+        <tr>
+            <td style="padding: 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 80%; text-align: right; border-right: 1px solid #000; padding: 5px;"><b>Total</b></td>
+                        <td style="width: 20%; text-align: right; padding: 5px;"><b style="font-size: 14px;">₹ <span th:text="${invoice.grandTotal}"></span></b></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- ROW 5: Declaration and Bank Details -->
+        <tr>
+            <td style="padding: 0; border-bottom: none;">
+                <div class="footer-split">
+                    <div class="declaration">
+                        <u>Declaration</u><br/>
+                        We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.<br/><br/><br/>
+                        Customer's Seal and Signature
+                    </div>
+                    <div class="bank">
+                        <u>Company's Bank Details</u><br/>
+                        <table style="width: 100%;">
+                            <tr><td>Bank Name</td><td>: <b th:text="${company.bankName}"></b></td></tr>
+                            <tr><td>A/c No.</td><td>: <b th:text="${company.accountNumber}"></b></td></tr>
+                            <tr><td>Branch &amp; IFS Code</td><td>: <span th:text="${company.branch}"></span>, <span th:text="${company.ifsc}"></span></td></tr>
+                        </table>
+                        <br/>
+                        <div style="text-align: right;">
+                            <b th:text="'for ' + ${company.companyName}"></b><br/><br/><br/>
+                            Authorised Signatory
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+    
+    <div style="text-align: center; font-size: 10px; margin-top: 5px;">This is a Computer Generated Invoice</div>
+</body>
+</html>

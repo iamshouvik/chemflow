@@ -14,3 +14,5 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  thymeleaf:
+    cache: false
